@@ -1,0 +1,38 @@
+sdf_map:
+    local_radius_x: 4.5 
+    local_radius_y: 4.5 
+    local_radius_z: 5.5 
+    inflate_val: 0.15 
+    esdf_inflate: 0.075
+    local_map_margin: 0
+    ground_z: -1.0
+
+    cx: 385.754
+    cy: 236.743
+    fx: 385.754
+    fy: 257.296
+
+    use_depth_filter: true
+    depth_filter_tolerance: 0.15
+    depth_filter_maxdist: 4.5
+    depth_filter_mindist: 0.2
+    depth_filter_margin: 2
+    k_depth_scaling_factor: 1000.0
+    skip_pixel: 2
+
+    p_hit: 0.65
+    p_miss: 0.35
+    p_min: 0.12
+    p_max: 0.90
+    p_occ: 0.80
+    min_ray_length: 0.5
+    max_ray_length: 5.0
+
+    slice_height: 0.3
+    cut_height: 2.0
+    show_occ_time: false
+    show_esdf_time: false
+    use_uniform_update: true
+
+    pose_type: 1  
+    frame_id: "world"

@@ -8,7 +8,7 @@
     <arg name="map_size_z" value=" 2.0"/>
     <arg name="odom_topic" value="visual_slam/odom" />
 
-    <node pkg="my_simple_planner" type="test_esdf" output="screen" name="test_esdf">
+    <node pkg="my_simple_planner" type="test_esdf_node" output="screen" name="test_esdf" ns="drone_$(arg drone_id)">
       <rosparam command="load" file="$(find my_simple_planner)/config/esdf.yaml"/>
       <param name="sdf_map/global/x_size"   value="$(arg map_size_x)" /> 
       <param name="sdf_map/global/y_size"   value="$(arg map_size_y)" /> 
@@ -16,12 +16,12 @@
       
       <remap from = "/sdf_map/depth"  to = "pcl_render_node/depth"/>
       <remap from = "/sdf_map/pose"   to = "pcl_render_node/camera_pose"/> 
-      <remap from = "/sdf_map/odom"   to = "$(arg odometry_topic)"/> 
+      <remap from = "/sdf_map/odom"   to = "$(arg odom_topic)"/> 
       <remap from = "/sdf_map/cloud"  to = "pcl_render_node/cloud"/> 
     </node>
 
     <!-- use simulator -->
-    <include file="$(find ego_planner)/launch/simulator.xml">
+    <include file="$(find my_simple_planner)/launch/simulator.xml">
         <arg name="drone_id" value="$(arg drone_id)"/>
         <arg name="map_size_x_" value="$(arg map_size_x)"/>
         <arg name="map_size_y_" value="$(arg map_size_y)"/>

@@ -55,8 +55,8 @@
 
       <param name="type" type="int" value="1"/>
 
-      <param name="complexity"    type="double" value="0.05"/>
-      <param name="fill"          type="double" value="0.12"/>
+      <param name="complexity"    type="double" value="0.03"/>
+      <param name="fill"          type="double" value="0.10"/>
       <param name="fractal"       type="int"    value="1"/>
       <param name="attenuation"   type="double" value="0.1"/>
   </node>
@@ -92,16 +92,16 @@
         <param name="gains/ang/z" value="0.1"/>        
   </node>   -->
   
-  <node pkg="poscmd_2_odom" name="drone_$(arg drone_id)_poscmd_2_odom" type="poscmd_2_odom" output="screen">
+  <node pkg="poscmd_2_odom" name="poscmd_2_odom" type="poscmd_2_odom" output="screen" ns="drone_$(arg drone_id)">
         <param name="init_x" value="$(arg init_x_)"/>
         <param name="init_y" value="$(arg init_y_)"/>
         <param name="init_z" value="$(arg init_z_)"/>
-        <remap from="~command" to="drone_$(arg drone_id)_planning/pos_cmd"/>
-        <remap from="~odometry" to="drone_$(arg drone_id)_$(arg odometry_topic)"/>
+        <remap from="~command" to="planning/pos_cmd"/>
+        <remap from="~odometry" to="$(arg odometry_topic)"/>
   </node>
  
-  <node pkg="odom_visualization" name="drone_$(arg drone_id)_odom_visualization" type="odom_visualization" output="screen">
-        <remap from="~odom" to="drone_$(arg drone_id)_visual_slam/odom"/>
+  <node pkg="odom_visualization" name="odom_visualization" type="odom_visualization" output="screen" ns="drone_$(arg drone_id)">
+        <remap from="~odom" to="$(arg odometry_topic)"/>
         <param name="color/a" value="1.0"/>    
         <param name="color/r" value="0.0"/>        
         <param name="color/g" value="0.0"/>        
@@ -112,7 +112,7 @@
         <param name="drone_id" value="drone_id"/>
   </node>
 
-  <node pkg="local_sensing_node" type="pcl_render_node" name="pcl_render_node" output="screen" namespace="drone_$(arg drone_id)">
+  <node pkg="local_sensing_node" type="pcl_render_node" name="pcl_render_node" output="screen" ns="drone_$(arg drone_id)">
         <rosparam command="load" file="$(find local_sensing_node)/params/camera.yaml" />
         <param name="sensing_horizon"  value="5.0" />
         <param name="sensing_rate"     value="30.0"/>

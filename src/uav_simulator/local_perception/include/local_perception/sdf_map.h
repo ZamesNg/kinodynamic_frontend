@@ -38,17 +38,17 @@ private:
 
   // map property
   Eigen::Vector3d origin, map_size;
-  Eigen::Vector3d min_range, max_range;  // map range in pos
-  Eigen::Vector3i grid_size;             // map range in index
+  Eigen::Vector3d min_range, max_range; // map range in pos
+  Eigen::Vector3i grid_size;            // map range in index
   double resolution, resolution_inv;
-  Eigen::Vector3i min_vec, max_vec;  // the min and max updated range, unit is 1
+  Eigen::Vector3i min_vec, max_vec; // the min and max updated range, unit is 1
   double truncated_distance = 20.0;
 
   Eigen::Vector3d last_fill_pt;
 
   inline bool isInMap(Eigen::Vector3d pos);
-  inline void posToIndex(Eigen::Vector3d pos, Eigen::Vector3i& id);
-  inline void indexToPos(Eigen::Vector3i id, Eigen::Vector3d& pos);
+  inline void posToIndex(Eigen::Vector3d pos, Eigen::Vector3i &id);
+  inline void indexToPos(Eigen::Vector3i id, Eigen::Vector3d &pos);
 
   template <typename F_get_val, typename F_set_val>
   void fillESDF(F_get_val f_get_val, F_set_val f_set_val, int start, int end, int dim);
@@ -68,28 +68,28 @@ public:
   inline void setOccupancy(Eigen::Vector3d pos, double occ = 1);
   inline int getOccupancy(Eigen::Vector3d pos);
   inline int getOccupancy(Eigen::Vector3i id);
-  inline int getInflateOccupancy(Eigen::Vector3d pos);
+  int getInflateOccupancy(Eigen::Vector3d pos);
 
   // distance field management
   inline double getDistance(Eigen::Vector3d pos);
   inline double getDistance(Eigen::Vector3i id, int sign = 1);
-  inline double getDistWithGradTrilinear(Eigen::Vector3d pos, Eigen::Vector3d& grad);
+  inline double getDistWithGradTrilinear(Eigen::Vector3d pos, Eigen::Vector3d &grad);
   // /inline void setLocalRange(Eigen::Vector3d min_pos, Eigen::Vector3d max_pos);
 
   void updateESDF3d();
-  void getSliceESDF(const double height, const double res, Eigen::Vector4d range, vector<Eigen::Vector3d>& slice,
-                    vector<Eigen::Vector3d>& grad,
-                    int sign = 1);  // 1 pos, 2 neg, 3 combined
+  void getSliceESDF(const double height, const double res, Eigen::Vector4d range, vector<Eigen::Vector3d> &slice,
+                    vector<Eigen::Vector3d> &grad,
+                    int sign = 1); // 1 pos, 2 neg, 3 combined
 
   /* ---------- try to fill local minima ---------- */
-  vector<Eigen::Vector3d> findPeaks(const Eigen::Vector3d& pt);
-  bool fillLocalMinima(const vector<Eigen::Vector3d>& peaks, Eigen::Vector3d& center, Eigen::Vector3d& scale);
+  vector<Eigen::Vector3d> findPeaks(const Eigen::Vector3d &pt);
+  bool fillLocalMinima(const vector<Eigen::Vector3d> &peaks, Eigen::Vector3d &center, Eigen::Vector3d &scale);
 
-  bool tryFillMinima(const Eigen::Vector3d& pt, Eigen::Vector3d& center, Eigen::Vector3d& cube_len);
+  bool tryFillMinima(const Eigen::Vector3d &pt, Eigen::Vector3d &center, Eigen::Vector3d &cube_len);
 
   /* ---------- new ros wrapper ---------- */
   // public:
-  void initMap(ros::NodeHandle& nh);
+  void initMap(ros::NodeHandle &nh);
 
   void publishMap();
 
@@ -109,22 +109,22 @@ public:
   typedef std::shared_ptr<SDFMap> Ptr;
 
 private:
-  void depthPoseCallback(const sensor_msgs::ImageConstPtr& img, const geometry_msgs::PoseStampedConstPtr& pose);
-  void depthOdomCallback(const sensor_msgs::ImageConstPtr& img, const nav_msgs::OdometryConstPtr& odom);
+  void depthPoseCallback(const sensor_msgs::ImageConstPtr &img, const geometry_msgs::PoseStampedConstPtr &pose);
+  void depthOdomCallback(const sensor_msgs::ImageConstPtr &img, const nav_msgs::OdometryConstPtr &odom);
 
-  void depthCallback(const sensor_msgs::ImageConstPtr& img);
-  void cloudCallback(const sensor_msgs::PointCloud2ConstPtr& img);
-  void poseCallback(const geometry_msgs::PoseStampedConstPtr& pose);
-  void odomCallback(const nav_msgs::OdometryConstPtr& odom);
+  void depthCallback(const sensor_msgs::ImageConstPtr &img);
+  void cloudCallback(const sensor_msgs::PointCloud2ConstPtr &img);
+  void poseCallback(const geometry_msgs::PoseStampedConstPtr &pose);
+  void odomCallback(const nav_msgs::OdometryConstPtr &odom);
 
-  void updateOccupancyCallback(const ros::TimerEvent& /*event*/);
-  void updateESDFCallback(const ros::TimerEvent& /*event*/);
+  void updateOccupancyCallback(const ros::TimerEvent & /*event*/);
+  void updateESDFCallback(const ros::TimerEvent & /*event*/);
 
   void projectDepthImage();
 
   void raycastProcess();
 
-  inline void inflatePoint(const Eigen::Vector3i& pt, int step, vector<Eigen::Vector3i>& pts);
+  inline void inflatePoint(const Eigen::Vector3i &pt, int step, vector<Eigen::Vector3i> &pts);
   void clearAndInflateLocalMap();
 
   int setCacheOccupancy(Eigen::Vector3d pos, int occ);
@@ -212,7 +212,7 @@ private:
   bool use_uniform_update_ = true;
   string frame_id_;
 
-  Eigen::Vector3d* output_buffer;
+  Eigen::Vector3d *output_buffer;
   int output_points_cnt;
 };
 

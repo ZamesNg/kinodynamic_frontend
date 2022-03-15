@@ -1,0 +1,53 @@
+<launch>
+  <!-- number of moving objects -->
+  <arg name="obj_num" value="10" />
+  <arg name="drone_id" value="0" />
+
+  <arg name="map_size_x" value="50.0" />
+  <arg name="map_size_y" value="30.0" />
+  <arg name="map_size_z" value="3.0" />
+  <arg name="odom_topic" value="visual_slam/odom" />
+
+  <node pkg="my_simple_planner" type="test_kino_rrt_star_node" output="screen" name="test_kino_rrt_star" ns="drone_$(arg drone_id)">
+    <rosparam command="load" file="$(find my_simple_planner)/config/esdf.yaml" />
+    <param name="sdf_map/global/x_size" value="$(arg map_size_x)" />
+    <param name="sdf_map/global/y_size" value="$(arg map_size_y)" />
+    <param name="sdf_map/global/z_size" value="$(arg map_size_z)" />
+
+    <param name="planner/map_size/x" value="$(arg map_size_x)" />
+    <param name="planner/map_size/y" value="$(arg map_size_y)" />
+    <param name="planner/map_size/z" value="$(arg map_size_z)" />
+
+    <param name="planner/origin/x" value="0.0" />
+    <param name="planner/origin/y" value="0.0" />
+    <param name="planner/origin/z" value="1.5" />
+
+    <param name="planner/goal_tolerance" value="0.8" />
+    <param name="planner/resolution" value="0.05" />
+
+    <remap from="/sdf_map/depth" to="pcl_render_node/depth" />
+    <remap from="/sdf_map/pose" to="pcl_render_node/camera_pose" />
+    <remap from="/sdf_map/odom" to="$(arg odom_topic)" />
+    <!-- <remap from="/sdf_map/cloud" to="pcl_render_node/cloud" /> -->
+    <remap from="/sdf_map/cloud" to="/map_generator/global_cloud" />
+
+    <remap from="/test_planner/goal" to="/goal" />
+    <remap from="/test_planner/odom" to="$(arg odom_topic)" />
+
+  </node>
+
+  <!-- use simulator -->
+  <include file="$(find my_simple_planner)/launch/simulator.xml">
+    <arg name="drone_id" value="$(arg drone_id)" />
+    <arg name="map_size_x_" value="$(arg map_size_x)" />
+    <arg name="map_size_y_" value="$(arg map_size_y)" />
+    <arg name="map_size_z_" value="$(arg map_size_z)" />
+    <arg name="init_x_" value="-15.0" />
+    <arg name="init_y_" value="0.0" />
+    <arg name="init_z_" value="1.5" />
+    <arg name="min_dist" value="0.8" />
+    <arg name="p_num" value="100.0" />
+    <arg name="c_num" value="100.0" />
+    <arg name="odometry_topic" value="$(arg odom_topic)" />
+  </include>
+</launch>

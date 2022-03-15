@@ -86,7 +86,7 @@ inline int SDFMap::getOccupancy(Eigen::Vector3d pos)
                                                                                                                      0;
 }
 
-inline int SDFMap::getInflateOccupancy(Eigen::Vector3d pos)
+int SDFMap::getInflateOccupancy(Eigen::Vector3d pos)
 {
   if (!isInMap(pos))
     return -1;
@@ -121,7 +121,7 @@ inline double SDFMap::getDistance(Eigen::Vector3d pos)
   return distance_buffer_all[id(0) * grid_size(1) * grid_size(2) + id(1) * grid_size(2) + id(2)];
 }
 
-inline double SDFMap::getDistance(Eigen::Vector3i id, int sign)
+double SDFMap::getDistance(Eigen::Vector3i id, int sign)
 {
   id(0) = max(min(id(0), grid_size(0) - 1), 0);
   id(1) = max(min(id(1), grid_size(1) - 1), 0);
@@ -581,7 +581,7 @@ void SDFMap::initMap(ros::NodeHandle& nh)
   esdf_inflate_ = max(resolution, esdf_inflate_);
 
   resolution_inv = 1 / resolution;
-  origin   = Eigen::Vector3d(-y_size / 2.0, -y_size / 2.0, ground_z_);
+  origin   = Eigen::Vector3d(-x_size / 2.0, -y_size / 2.0, ground_z_);
   map_size = Eigen::Vector3d(x_size, y_size, z_size);
 
   prob_hit_log_ = logit(p_hit_);

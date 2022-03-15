@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(my_simple_planner)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} -O3 -Wall") # -Wextra -Werror
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} -O3 -Wall") # -Wextra -Werror
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,6 +11,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} -O3 -Wall") # -Wextra -Werror
 find_package(catkin REQUIRED COMPONENTS
   local_map
   roscpp
+  quadrotor_msgs
   sensor_msgs
   std_msgs
   visualization_msgs
@@ -131,9 +132,13 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/my_simple_planner.cpp
-# )
+add_library(libkinodyn_rrt_star
+  src/kinodyn_rrt_star/kinodynRRTStar.cpp
+)
+
+add_library(libkdtree
+  src/kdtree/kdtree.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -146,6 +151,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(test_esdf_node test/test_esdf.cpp)
+add_executable(test_kino_rrt_star_node test/test_kino_rrt_star.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -162,6 +168,16 @@ target_link_libraries(test_esdf_node
   ${catkin_LIBRARIES}
 )
 
+target_link_libraries(libkinodyn_rrt_star
+  ${catkin_LIBRARIES}
+  libkdtree
+)
+
+target_link_libraries(test_kino_rrt_star_node
+  ${catkin_LIBRARIES}
+  libkdtree
+  libkinodyn_rrt_star
+)
 #############
 ## Install ##
 #############

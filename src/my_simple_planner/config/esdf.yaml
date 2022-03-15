@@ -1,11 +1,12 @@
 sdf_map:
-    local_radius_x: 4.5 
-    local_radius_y: 4.5 
-    local_radius_z: 5.5 
+    resolution: 0.05
+    local_radius_x: 50.0 
+    local_radius_y: 20.0 
+    local_radius_z: 5.0 
     inflate_val: 0.15 
     esdf_inflate: 0.075
     local_map_margin: 0
-    ground_z: -1.0
+    ground_z: 0.0
 
     cx: 385.754
     cy: 236.743
@@ -29,7 +30,7 @@ sdf_map:
     max_ray_length: 5.0
 
     slice_height: 0.3
-    cut_height: 2.0
+    cut_height: 10.0
     show_occ_time: false
     show_esdf_time: false
     use_uniform_update: true

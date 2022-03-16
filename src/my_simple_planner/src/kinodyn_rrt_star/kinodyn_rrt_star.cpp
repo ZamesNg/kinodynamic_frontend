@@ -66,7 +66,7 @@ double StateNode::calcOptimalTrajWithFullState_(DroneState_t start, DroneState_t
   coeff.row(2) = a0 / 2.0;
 
   if (optimal_T == -1.0)
-    ROS_ERROR("from point(%f, %f, %f) to point(%f, %f, %f) optimal_T cannot be found!", p0(0), p0(1), p0(2), pf(0), pf(1), pf(2));
+    ROS_ERROR("from point(%.4f, %.4f, %.4f) to point(%.4f, %.4f, %.4f) optimal_T cannot be found!", p0(0), p0(1), p0(2), pf(0), pf(1), pf(2));
 
   return optimal_cost;
 }
@@ -131,7 +131,7 @@ double StateNode::calcOptimalTrajWithPartialState_(DroneState_t start, Eigen::Ve
   coeff.row(2) = a0 / 2.0;
 
   if (optimal_T == -1.0)
-    ROS_ERROR("from point(%f, %f, %f) to point(%f, %f, %f) optimal_T cannot be found!", p0(0), p0(1), p0(2), pf(0), pf(1), pf(2));
+    ROS_ERROR("from point(%.4f, %.4f, %.4f) to point(%.4f, %.4f, %.4f) optimal_T cannot be found!", p0(0), p0(1), p0(2), pf(0), pf(1), pf(2));
 
   return optimal_cost;
 }
@@ -195,27 +195,42 @@ void KinodynRRTStarPlanner::initPlanner(ros::NodeHandle &nh, shared_ptr<SDFMap> 
   nh.param("planner/origin/y", map_origin_(1), 0.0);
   nh.param("planner/origin/z", map_origin_(2), 0.0);
 
+  nh.param("planner/origin/z", step_size_, 1.0);
+
   ROS_INFO("------------Kinodynamic RRT Star Parameter List------------");
-  ROS_INFO("goal_tolerance:%fm", goal_tolerance);
-  ROS_INFO("resolution:%fs", resolution);
-  ROS_INFO("map_size:(%f, %f, %f)", map_size(0), map_size(1), map_size(2));
-  ROS_INFO("map_origin:(%f, %f, %f)", map_origin_(0), map_origin_(1), map_origin_(2));
+  ROS_INFO("goal_tolerance:%.4fm", goal_tolerance);
+  ROS_INFO("resolution:%.4fs", resolution);
+  ROS_INFO("map_size:(%.4f, %.4f, %.4f)", map_size(0), map_size(1), map_size(2));
+  ROS_INFO("map_origin:(%.4f, %.4f, %.4f)", map_origin_(0), map_origin_(1), map_origin_(2));
 
   // vis_timer = nh.createTimer(ros::Duration(0.5), &KinodynRRTStarPlanner::visualizeTraj, this);
   vis_traj_library_pub_ = nh.advertise<visualization_msgs::MarkerArray>("/planner/trajectory_lib", 1);
 
-  vis_trajectory_.header.frame_id = "world";
-  vis_trajectory_.header.stamp = ros::Time::now();
-  vis_trajectory_.ns = "planner/trajectory_library";
-  vis_trajectory_.action = visualization_msgs::Marker::ADD;
-  vis_trajectory_.pose.orientation.w = 1.0;
-  vis_trajectory_.type = visualization_msgs::Marker::LINE_STRIP;
-  vis_trajectory_.scale.x = 0.02;
+  vis_sample_trajectory_.header.frame_id = "world";
+  vis_sample_trajectory_.header.stamp = ros::Time::now();
+  vis_sample_trajectory_.ns = "planner/trajectory_library";
+  vis_sample_trajectory_.action = visualization_msgs::Marker::ADD;
+  vis_sample_trajectory_.pose.orientation.w = 1.0;
+  vis_sample_trajectory_.type = visualization_msgs::Marker::LINE_STRIP;
+  vis_sample_trajectory_.scale.x = 0.02;
 
-  vis_trajectory_.color.r = 0.0;
-  vis_trajectory_.color.g = 1.0;
-  vis_trajectory_.color.b = 0.0;
-  vis_trajectory_.color.a = 0.2;
+  vis_sample_trajectory_.color.r = 0.0;
+  vis_sample_trajectory_.color.g = 1.0;
+  vis_sample_trajectory_.color.b = 0.0;
+  vis_sample_trajectory_.color.a = 0.2;
+
+  vis_final_trajectory_.header.frame_id = "world";
+  vis_final_trajectory_.header.stamp = ros::Time::now();
+  vis_final_trajectory_.ns = "planner/trajectory_library";
+  vis_final_trajectory_.action = visualization_msgs::Marker::ADD;
+  vis_final_trajectory_.pose.orientation.w = 1.0;
+  vis_final_trajectory_.type = visualization_msgs::Marker::LINE_STRIP;
+  vis_final_trajectory_.scale.x = 0.08;
+
+  vis_final_trajectory_.color.r = 1.0;
+  vis_final_trajectory_.color.g = 0.0;
+  vis_final_trajectory_.color.b = 0.0;
+  vis_final_trajectory_.color.a = 0.7;
 
   vis_sample_points_.header.frame_id = "world";
   vis_sample_points_.header.stamp = ros::Time::now();
@@ -239,6 +254,7 @@ void KinodynRRTStarPlanner::initPlanner(ros::NodeHandle &nh, shared_ptr<SDFMap> 
   kd_tree = kd_create(3);
   map_ = map;
   goal_ = new StateNode(Eigen::Vector3d::Zero());
+  goal_->setCost(StateNode::kErrorCost);
 }
 // always find a trajectory but may not reach the goal
 // when time limit is reached, will return a trajectory
@@ -259,8 +275,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
   start_ = new StateNode(start_pos);
   start_->setState(start_pos, start_vel, start_acc);
   start_->setGoal(goal_->getState());
-
-  // updateNode(start);
+  updateNode(start_);
 
   reach_goal_ = false;
 
@@ -269,7 +284,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
   {
     samplePos();
     // Eigen::Vector3d end = sample_node_->getState().pos;
-    // ROS_INFO("---------------- new pos(%f, %f, %f) is sampled ----------------", end(0), end(1), end(2));
+    // ROS_INFO("---------------- new pos(%.4f, %.4f, %.4f) is sampled ----------------", end(0), end(1), end(2));
     // steer()
     double min_cost = StateNode::kErrorCost;
     double optimal_T = -1.0;
@@ -295,7 +310,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
     if (parent && min_cost < StateNode::kErrorCost)
     {
       // Eigen::Vector3d start = parent->getState().pos;
-      // ROS_WARN("Find a collision free path from (%f, %f, %f) to (%f, %f, %f) with time:%fs and cost:%f!", start(0), start(1), start(2), end(0), end(1), end(2), optimal_T, min_cost);
+      // ROS_WARN("Find a collision free path from (%.4f, %.4f, %.4f) to (%.4f, %.4f, %.4f) with time:%.4fs and cost:%.4f!", start(0), start(1), start(2), end(0), end(1), end(2), optimal_T, min_cost);
       sample_node_->setParent(parent, min_cost, optimal_T, optimal_coeff);
       sample_node_->setGoal(goal_->getState());
       updateNode(sample_node_);
@@ -303,7 +318,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
     else
     {
       // Eigen::Vector3d pos = sample_node_->getState().pos;
-      // ROS_WARN("Can not find a feasiable free path from pos:(%f, %f, %f), this state will be dropped!", pos(0), pos(1), pos(2));
+      // ROS_WARN("Can not find a feasiable free path from pos:(%.4f, %.4f, %.4f), this state will be dropped!", pos(0), pos(1), pos(2));
       continue;
     }
 
@@ -318,16 +333,25 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
         (*near)->setParent(sample_node_, cost, T, coeff);
         // Eigen::Vector3d start = sample_node_->getState().pos;
         // end = (*near)->getState().pos;
-        // ROS_WARN("rewrite a path from (%f, %f, %f) to (%f, %f, %f) with time:%fs and cost:%f!", start(0), start(1), start(2), end(0), end(1), end(2), T, cost);
+        // ROS_WARN("rewrite a path from (%.4f, %.4f, %.4f) to (%.4f, %.4f, %.4f) with time:%.4fs and cost:%.4f!", start(0), start(1), start(2), end(0), end(1), end(2), T, cost);
       }
     }
-    reach_goal_ = checkGoal(sample_node_->getState().pos, goal_->getState().pos);
+
+    cost = goal_->calcOptimalTrajWithPartialState(sample_node_->getState(), T, coeff);
+    if (checkCollision(coeff, T) && cost + sample_node_->getCost() < goal_->getCost())
+    {
+      ROS_INFO("A feasiable trajectort to goal was found with cost = %.4f!", cost + sample_node_->getCost());
+      goal_->setParent(sample_node_, cost, T, coeff);
+      retrieveTraj(goal_);
+    }
+
+    // reach_goal_ = checkGoal(sample_node_->getState().pos, goal_->getState().pos);
     visTrajLib();
   }
 
   // TODO: reach goal and merge informed RRT* to it?
-  retrieveTraj(sample_node_);
-  state_nodes_.sort();
+  // retrieveTraj(sample_node_);
+  // state_nodes_.sort();
 
   return true;
 }
@@ -336,12 +360,22 @@ void KinodynRRTStarPlanner::samplePos()
 {
   int collision_flag = 1;
   Eigen::Vector3d sample_pos;
+  Eigen::Vector3d near_pos;
+  kdres *nearest_node;
 
   while (collision_flag == 1)
   {
     // sample randomly
     sample_pos = Eigen::Vector3d::Random();
     sample_pos = map_size_ * sample_pos + map_origin_;
+
+    double pos[3] = {sample_pos(0), sample_pos(1), sample_pos(2)};
+    nearest_node = kd_nearest(kd_tree, pos);
+    near_pos = ((StateNode::Ptr)kd_res_item_data(nearest_node))->getState().pos;
+
+    // ROS_INFO("nearest_pos(%.4f, %.4f, %.4f)\t random_sample(%.4f, %.4f, %.4f)", near_pos(0), near_pos(0), near_pos(0), sample_pos(0), sample_pos(0), sample_pos(0));
+    sample_pos = (sample_pos - near_pos).normalized() * step_size_ + near_pos;
+    // ROS_INFO("final sampled pos(%.4f, %.4f, %.4f)", sample_pos(0), sample_pos(0), sample_pos(0));
 
     // check if sample in obscale
     collision_flag = map_->getInflateOccupancy(sample_pos);
@@ -392,7 +426,6 @@ void KinodynRRTStarPlanner::nearestBackwardNeighbors()
   kdres *set = kd_nearest_range(kd_tree, state_tau, 4.0 * sqrt(5.0) * tau * tau * tau);
 
   neighbors_.clear();
-  neighbors_.push_back(start_);
   StateNode::Ptr neighbor;
   while (!kd_res_end(set))
   {
@@ -424,7 +457,6 @@ void KinodynRRTStarPlanner::nearestForwardNeighbors()
   kdres *set = kd_nearest_range(kd_tree, state_tau, 4.0 * sqrt(5.0) * tau * tau * tau);
 
   neighbors_.clear();
-  // neighbors_.push_back(start_);
   StateNode::Ptr neighbor;
   while (!kd_res_end(set))
   {
@@ -439,3 +471,82 @@ void KinodynRRTStarPlanner::nearestForwardNeighbors()
   }
   kd_res_free(set);
 }
+
+void KinodynRRTStarPlanner::visTrajLib()
+{
+  Eigen::Matrix<double, 6, 1> nature_bais;
+  Eigen::Matrix<double, 6, 3> coeff;
+  double T;
+  Eigen::Vector3d pos;
+  geometry_msgs::Point pt;
+  int marker_id = 0;
+
+  for (auto node = state_nodes_.cbegin(); node != state_nodes_.cend(); ++node, ++marker_id)
+  {
+    coeff = (*node)->getPolyTraj();
+    T = (*node)->getInterval();
+
+    vis_sample_trajectory_.points.clear();
+    vis_sample_trajectory_.id = marker_id;
+    for (double t = 0.0; t < T; t += 0.1)
+    {
+      nature_bais << 1.0, t, t * t, t * t * t,
+          t * t * t * t, t * t * t * t * t;
+      pos = coeff.transpose() * nature_bais;
+
+      pt.x = pos(0);
+      pt.y = pos(1);
+      pt.z = pos(2);
+      vis_sample_trajectory_.points.push_back(pt);
+    }
+
+    nature_bais << 1.0, T, T * T, T * T * T,
+        T * T * T * T, T * T * T * T * T;
+
+    pos = coeff.transpose() * nature_bais;
+    pt.x = pos(0);
+    pt.y = pos(1);
+    pt.z = pos(2);
+    vis_sample_trajectory_.points.push_back(pt);
+    vis_sample_points_.points.push_back(pt);
+    vis_trajectorylib_.markers.push_back(vis_sample_trajectory_);
+  }
+
+  if (goal_->getParent())
+  {
+    for (auto node = goal_; node->getParent(); node = node->getParent(), ++marker_id)
+    {
+      coeff = node->getPolyTraj();
+      T = node->getInterval();
+
+      vis_final_trajectory_.points.clear();
+      vis_final_trajectory_.id = marker_id;
+      for (double t = 0.0; t < T; t += 0.1)
+      {
+        nature_bais << 1.0, t, t * t, t * t * t,
+            t * t * t * t, t * t * t * t * t;
+        pos = coeff.transpose() * nature_bais;
+
+        pt.x = pos(0);
+        pt.y = pos(1);
+        pt.z = pos(2);
+        vis_final_trajectory_.points.push_back(pt);
+      }
+      nature_bais << 1.0, T, T * T, T * T * T,
+          T * T * T * T, T * T * T * T * T;
+
+      pos = coeff.transpose() * nature_bais;
+      pt.x = pos(0);
+      pt.y = pos(1);
+      pt.z = pos(2);
+      vis_final_trajectory_.points.push_back(pt);
+      vis_trajectorylib_.markers.push_back(vis_final_trajectory_);
+    }
+  }
+
+  vis_sample_points_.id = marker_id + 1;
+  vis_trajectorylib_.markers.push_back(vis_sample_points_);
+  vis_traj_library_pub_.publish(vis_trajectorylib_);
+  vis_trajectorylib_.markers.clear();
+  vis_sample_points_.points.clear();
+};

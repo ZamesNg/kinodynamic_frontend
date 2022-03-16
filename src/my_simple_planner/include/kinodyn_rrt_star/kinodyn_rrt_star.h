@@ -39,6 +39,9 @@ public:
   double calcOptimalTrajWithFullState(DroneState_t parent, double &optimal_T, Eigen::Matrix<double, 6, 3> &coeff) { return calcOptimalTrajWithFullState_(parent, state_, optimal_T, coeff); };
   double calcOptimalTrajWithPartialState(DroneState_t parent, double &optimal_T, Eigen::Matrix<double, 6, 3> &coeff) { return calcOptimalTrajWithPartialState_(parent, state_.pos, optimal_T, coeff); };
 
+  void setCostToParent(double cost) { cost_to_parent_ = cost; };
+  void setCost(double cost) { cost_ = cost; };
+
   // this will update related data
   bool setParent(Ptr parent, double cost_to_parent, double T, Eigen::Matrix<double, 6, 3> coeff);
   bool setGoal(DroneState_t goal_state);
@@ -107,6 +110,7 @@ private:
   double goal_tolerance;
   // use to check collision
   double resolution;
+  double step_size_;
   StateNode::Ptr start_;
   StateNode::Ptr goal_;
   StateNode::Ptr sample_node_;
@@ -127,7 +131,8 @@ private:
 
   // visualize
   visualization_msgs::MarkerArray vis_trajectorylib_;
-  visualization_msgs::Marker vis_trajectory_;
+  visualization_msgs::Marker vis_sample_trajectory_;
+  visualization_msgs::Marker vis_final_trajectory_;
   visualization_msgs::Marker vis_sample_points_;
 
   // ros::Timer vis_timer;
@@ -195,51 +200,7 @@ private:
     }
   };
 
-  void visTrajLib()
-  {
-    Eigen::Matrix<double, 6, 1> nature_bais;
-    Eigen::Matrix<double, 6, 3> coeff;
-    double T;
-    Eigen::Vector3d pos;
-    geometry_msgs::Point pt;
-    int marker_id = 0;
-
-    for (auto node = state_nodes_.cbegin(); node != state_nodes_.cend(); ++node, ++marker_id)
-    {
-      coeff = (*node)->getPolyTraj();
-      T = (*node)->getInterval();
-
-      vis_trajectory_.points.clear();
-      vis_trajectory_.id = marker_id;
-      for (double t = 0.0; t < T; t += 0.1)
-      {
-        nature_bais << 1.0, t, t * t, t * t * t,
-            t * t * t * t, t * t * t * t * t;
-        pos = coeff.transpose() * nature_bais;
-
-        pt.x = pos(0);
-        pt.y = pos(1);
-        pt.z = pos(2);
-        vis_trajectory_.points.push_back(pt);
-      }
-
-      nature_bais << 1.0, T, T * T, T * T * T,
-          T * T * T * T, T * T * T * T * T;
-
-      pos = coeff.transpose() * nature_bais;
-      pt.x = pos(0);
-      pt.y = pos(1);
-      pt.z = pos(2);
-      vis_trajectory_.points.push_back(pt);
-      vis_sample_points_.points.push_back(pt);
-      vis_trajectorylib_.markers.push_back(vis_trajectory_);
-    }
-    vis_sample_points_.id = marker_id + 1;
-    vis_trajectorylib_.markers.push_back(vis_sample_points_);
-    vis_traj_library_pub_.publish(vis_trajectorylib_);
-    vis_trajectorylib_.markers.clear();
-    vis_sample_points_.points.clear();
-  };
+  void visTrajLib();
 
   // void visualizeTraj(const ros::TimerEvent &event)
   // {

@@ -24,6 +24,7 @@
 
     <param name="planner/goal_tolerance" value="0.8" />
     <param name="planner/resolution" value="0.05" />
+    <param name="planner/step_size_" value="1.0" />
 
     <remap from="/sdf_map/depth" to="pcl_render_node/depth" />
     <remap from="/sdf_map/pose" to="pcl_render_node/camera_pose" />

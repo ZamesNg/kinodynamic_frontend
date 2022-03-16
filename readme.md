@@ -39,9 +39,8 @@ press `G` in rviz and select your goal.
 
 Search a trajectory in a maze-like `30m x 20m x 3m` environment:
 
-<video id="video" controls="" preload="none" poster="封面">
-      <source id="kino-dynamic RRT*" src="AA" type="video/kinodynamic_rrt_start_30x320x3.webm.mov">
-</videos>
+![Kinodynamic-RRT*](image/kinodynamic_rrt_start_30x320x3.gif)
+
 
 ---
 

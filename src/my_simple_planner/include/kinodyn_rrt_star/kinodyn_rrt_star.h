@@ -128,6 +128,7 @@ private:
   // visualize
   visualization_msgs::MarkerArray vis_trajectorylib_;
   visualization_msgs::Marker vis_trajectory_;
+  visualization_msgs::Marker vis_sample_points_;
 
   // ros::Timer vis_timer;
   ros::Publisher vis_traj_library_pub_;
@@ -203,7 +204,7 @@ private:
     geometry_msgs::Point pt;
     int marker_id = 0;
 
-    for (auto node = state_nodes_.cbegin(); node != state_nodes_.cend(); ++node,++marker_id)
+    for (auto node = state_nodes_.cbegin(); node != state_nodes_.cend(); ++node, ++marker_id)
     {
       coeff = (*node)->getPolyTraj();
       T = (*node)->getInterval();
@@ -221,10 +222,23 @@ private:
         pt.z = pos(2);
         vis_trajectory_.points.push_back(pt);
       }
+
+      nature_bais << 1.0, T, T * T, T * T * T,
+          T * T * T * T, T * T * T * T * T;
+
+      pos = coeff.transpose() * nature_bais;
+      pt.x = pos(0);
+      pt.y = pos(1);
+      pt.z = pos(2);
+      vis_trajectory_.points.push_back(pt);
+      vis_sample_points_.points.push_back(pt);
       vis_trajectorylib_.markers.push_back(vis_trajectory_);
     }
+    vis_sample_points_.id = marker_id + 1;
+    vis_trajectorylib_.markers.push_back(vis_sample_points_);
     vis_traj_library_pub_.publish(vis_trajectorylib_);
     vis_trajectorylib_.markers.clear();
+    vis_sample_points_.points.clear();
   };
 
   // void visualizeTraj(const ros::TimerEvent &event)

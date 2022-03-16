@@ -6,7 +6,7 @@
 #include <visualization_msgs/Marker.h>
 
 #include "local_perception/sdf_map.h"
-#include "kinodyn_rrt_star/kinodynRRTStar.h"
+#include "kinodyn_rrt_star/kinodyn_rrt_star.h"
 
 using namespace std;
 
@@ -83,7 +83,7 @@ void recvGoalCallback(const geometry_msgs::PoseStamped &wp)
   Line.color.a = 1.0;
 
   ROS_WARN("%ld picese trajectory", coeffs.size());
-  for (int i = 0; i < coeffs.size(); ++i)
+  for (size_t i = 0; i < coeffs.size(); ++i)
   {
     coeff = coeffs[i];
     T = intervals[i];

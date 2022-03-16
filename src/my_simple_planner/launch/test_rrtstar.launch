@@ -42,8 +42,8 @@
     <arg name="map_size_x_" value="$(arg map_size_x)" />
     <arg name="map_size_y_" value="$(arg map_size_y)" />
     <arg name="map_size_z_" value="$(arg map_size_z)" />
-    <arg name="init_x_" value="-15.0" />
-    <arg name="init_y_" value="0.0" />
+    <arg name="init_x_" value="-20.0" />
+    <arg name="init_y_" value="-6.0" />
     <arg name="init_z_" value="1.5" />
     <arg name="min_dist" value="0.8" />
     <arg name="p_num" value="100.0" />

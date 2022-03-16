@@ -133,7 +133,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(libkinodyn_rrt_star
-  src/kinodyn_rrt_star/kinodynRRTStar.cpp
+  src/kinodyn_rrt_star/kinodyn_rrt_star.cpp
 )
 
 add_library(libkdtree

@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 
-#include "kinodyn_rrt_star/kinodynRRTStar.h"
+#include "kinodyn_rrt_star/kinodyn_rrt_star.h"
 
 double StateNode::calcOptimalTrajWithFullState_(DroneState_t start, DroneState_t end, double &optimal_T, Eigen::Matrix<double, 6, 3> &coeff)
 {
@@ -217,6 +217,21 @@ void KinodynRRTStarPlanner::initPlanner(ros::NodeHandle &nh, shared_ptr<SDFMap> 
   vis_trajectory_.color.b = 0.0;
   vis_trajectory_.color.a = 0.2;
 
+  vis_sample_points_.header.frame_id = "world";
+  vis_sample_points_.header.stamp = ros::Time::now();
+  vis_sample_points_.ns = "planner/trajectory_library";
+  vis_sample_points_.action = visualization_msgs::Marker::ADD;
+  vis_sample_points_.pose.orientation.w = 1.0;
+  vis_sample_points_.type = visualization_msgs::Marker::POINTS;
+  vis_sample_points_.scale.x = 0.05;
+  vis_sample_points_.scale.y = 0.05;
+  vis_sample_points_.scale.z = 0.05;
+
+  vis_sample_points_.color.r = 1.0;
+  vis_sample_points_.color.g = 0.0;
+  vis_sample_points_.color.b = 0.0;
+  vis_sample_points_.color.a = 0.8;
+
   // init planner
   reach_goal_ = false;
   sample_node_ = nullptr;
@@ -234,7 +249,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
   // nothing update
   if (!map_->hasDepthObservation())
   {
-    // ROS_WARN("The ESDF map does not have any observation!");
+    ROS_WARN("The ESDF map does not have any observation!");
     return false;
   }
 
@@ -253,7 +268,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
   while (!reach_goal_)
   {
     samplePos();
-    Eigen::Vector3d end = sample_node_->getState().pos;
+    // Eigen::Vector3d end = sample_node_->getState().pos;
     // ROS_INFO("---------------- new pos(%f, %f, %f) is sampled ----------------", end(0), end(1), end(2));
     // steer()
     double min_cost = StateNode::kErrorCost;
@@ -279,7 +294,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
 
     if (parent && min_cost < StateNode::kErrorCost)
     {
-      Eigen::Vector3d start = parent->getState().pos;
+      // Eigen::Vector3d start = parent->getState().pos;
       // ROS_WARN("Find a collision free path from (%f, %f, %f) to (%f, %f, %f) with time:%fs and cost:%f!", start(0), start(1), start(2), end(0), end(1), end(2), optimal_T, min_cost);
       sample_node_->setParent(parent, min_cost, optimal_T, optimal_coeff);
       sample_node_->setGoal(goal_->getState());
@@ -287,7 +302,7 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
     }
     else
     {
-      Eigen::Vector3d pos = sample_node_->getState().pos;
+      // Eigen::Vector3d pos = sample_node_->getState().pos;
       // ROS_WARN("Can not find a feasiable free path from pos:(%f, %f, %f), this state will be dropped!", pos(0), pos(1), pos(2));
       continue;
     }
@@ -301,8 +316,8 @@ bool KinodynRRTStarPlanner::searchTraj(Eigen::Vector3d start_pos, Eigen::Vector3
       if (checkCollision(coeff, T) && cost + sample_node_->getCost() < (*near)->getCost())
       {
         (*near)->setParent(sample_node_, cost, T, coeff);
-        Eigen::Vector3d start = sample_node_->getState().pos;
-        end = (*near)->getState().pos;
+        // Eigen::Vector3d start = sample_node_->getState().pos;
+        // end = (*near)->getState().pos;
         // ROS_WARN("rewrite a path from (%f, %f, %f) to (%f, %f, %f) with time:%fs and cost:%f!", start(0), start(1), start(2), end(0), end(1), end(2), T, cost);
       }
     }

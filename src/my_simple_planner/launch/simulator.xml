@@ -44,7 +44,7 @@
   <node pkg="mockamap" type="mockamap_node" name="mockamap_node" output="screen">  
       <remap from="/mock_map" to="/map_generator/global_cloud"/>
 
-      <param name="seed" type="int" value="127"/>
+      <param name="seed" type="int" value="121"/>
       <param name="update_freq" type="double" value="0.5"/>
 
       <param name="resolution" type="double" value="0.1"/>
@@ -55,8 +55,8 @@
 
       <param name="type" type="int" value="1"/>
 
-      <param name="complexity"    type="double" value="0.03"/>
-      <param name="fill"          type="double" value="0.10"/>
+      <param name="complexity"    type="double" value="0.05"/>
+      <param name="fill"          type="double" value="0.12"/>
       <param name="fractal"       type="int"    value="1"/>
       <param name="attenuation"   type="double" value="0.1"/>
   </node>

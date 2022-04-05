@@ -52,4 +52,4 @@ Not start yet, but in TODO list.
 
 I use some source file from repo like [mockamap](https://github.com/HKUST-Aerial-Robotics/mockamap), [Teach-Repeat-Replan](https://github.com/HKUST-Aerial-Robotics/Teach-Repeat-Replan), [kdtree](https://github.com/sdeming/kdtree).
 
-Thanks them for their high quality code.
+Thanks for their high quality code.

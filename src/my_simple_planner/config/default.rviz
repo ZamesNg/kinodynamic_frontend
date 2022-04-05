@@ -11,7 +11,7 @@ Panels:
         - /drone01/Simulation1/robot1
         - /Marker1
       Splitter Ratio: 0.554430365562439
-    Tree Height: 992
+    Tree Height: 441
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -323,7 +323,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 26.107257843017578
+      Distance: 25.522123336791992
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -331,17 +331,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.3682173192501068
-        Y: -5.435710430145264
-        Z: 9.737165783008095e-06
+        X: -0.8099370002746582
+        Y: -5.37547492980957
+        Z: 3.893650500685908e-06
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4197958707809448
+      Pitch: 1.164796233177185
       Target Frame: <Fixed Frame>
-      Yaw: 4.7351861000061035
+      Yaw: 4.681994915008545
     Saved:
       - Class: rviz/FPS
         Enable Stereo Rendering:

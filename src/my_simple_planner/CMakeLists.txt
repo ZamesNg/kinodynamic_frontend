@@ -140,6 +140,11 @@ add_library(libkdtree
   src/kdtree/kdtree.cpp
 )
 
+add_library( libjps_planner 
+    src/jps_planner/graph_search.cpp
+    src/jps_planner/jps_planner.cpp
+)
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -172,6 +177,10 @@ target_link_libraries(libkinodyn_rrt_star
   ${catkin_LIBRARIES}
   libkdtree
 )
+
+target_link_libraries( libjps_planner
+  ${catkin_LIBRARIES} 
+)  
 
 target_link_libraries(test_kino_rrt_star_node
   ${catkin_LIBRARIES}
